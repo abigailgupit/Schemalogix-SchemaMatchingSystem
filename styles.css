@@ -1,6 +1,6 @@
 :root {
-  --ink: #101d32;
-  --muted: #627084;
+  --ink: #006446;
+  --muted: #9d9f9d;
   --line: #d8e0ea;
   --surface: #ffffff;
   --soft: #f4fffb; /* ito yung background ng buong app */
@@ -45,8 +45,9 @@ select {
 
 .brand {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  justify-content: center;  /* center horizontally */
+  align-items: center;      /* center vertically if needed */
+  padding: 8px 0;
 }
 
 .brand-mark {
