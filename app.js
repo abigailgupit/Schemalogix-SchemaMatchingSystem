@@ -47,6 +47,7 @@ function parseCsv(csv) {
     return result;
   });
 
+
   const headers = rows[0] || [];
   const data = rows.slice(1).map((row) => {
     const record = {};
@@ -273,6 +274,8 @@ function trainLogisticRegression(candidates) {
     negativeCount: training.filter((item) => item.label === 0).length
   };
 }
+
+
 
 function scoreDatasets() {
   if (!state.source || !state.target) {

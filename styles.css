@@ -1,3 +1,4 @@
+
 :root {
   --ink: #006446;
   --muted: #9d9f9d;
@@ -141,6 +142,13 @@ h1 {
   margin-bottom: 0;
   font-size: 2rem;
   letter-spacing: 0;
+}
+
+/* Add this just below your h1 or at the top */
+.orbitron-font {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;       /* bold style */
+  color: #207a56;         /* optional: match your green theme */
 }
 
 h2 {

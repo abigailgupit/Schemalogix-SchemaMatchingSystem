@@ -4,6 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>CONMERGE SchemaLogix Prototype</title>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
+  </style>
     <link rel="stylesheet" href="./styles.css">
   </head>
   <body>
@@ -23,8 +26,8 @@
     <main class="app-shell">
       <header class="topbar">
         <div>
-          <p class="eyebrow">AI Project Prototype</p>
-          <h1>Schema Matching Dashboard</h1>
+          <p class="eyebrow">A Schema Matching System</p>
+          <h1><span class="orbitron-font">Schemalogix</span></h1>
         </div>
         <div class="toolbar">
           <button class="primary-button" type="button" id="runButton">Run Matching</button>
@@ -167,7 +170,7 @@
           <label for="thresholdInput">Match Probability Threshold</label>
           <div class="threshold-row">
             <input id="thresholdInput" type="range" min="0.10" max="0.95" step="0.01" value="0.70">
-            <output id="thresholdOutput" for="thresholdInput">0.70</output>
+            <output id="thresholdOutput" for="thresholdInput">0.50</output>
           </div>
         </section>
       </section>
