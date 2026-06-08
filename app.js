@@ -1,5 +1,5 @@
 const state = {
-  threshold: 0.7,
+  threshold: 0.5,
   source: null,
   target: null,
   truth: [],
@@ -233,7 +233,7 @@ function sigmoid(value) {
   return 1 / (1 + Math.exp(-value));
 }
 
-function logisticScore(weights, features) {
+function logisticScore(weights, features) { /* Computes the logistic regression score by applying the sigmoid function to the weighted sum of features. */
   const z = weights.reduce((sum, weight, index) => sum + (weight * features[index]), 0);
   return sigmoid(z);
 }
@@ -277,11 +277,25 @@ function trainLogisticRegression(candidates) {
 
 
 
-function scoreDatasets() {
+function scoreDatasets() { /* Main function to compute candidate pairs and train the logistic regression model based on both user feedback and bootstrapped labels. - Pairwise Cosine Similarity Calculation*/
   if (!state.source || !state.target) {
     addLog("Matching skipped. Upload both Dataset A and Dataset B first.");
     renderAll();
     return;
+  }
+
+  // Add this new function anywhere in app.js
+  function showToast() {
+    const toast = document.getElementById("matchToast");
+    toast.style.opacity = "1";
+    toast.style.transform = "translateY(0)";
+    toast.style.pointerEvents = "auto";
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => {
+      toast.style.opacity = "0";
+      toast.style.transform = "translateY(16px)";
+      toast.style.pointerEvents = "none";
+    }, 4000);
   }
 
   const sourceProfiles = state.source.headers.map((header, index) => columnProfile(state.source, header, index));
@@ -319,13 +333,14 @@ function scoreDatasets() {
     });
   });
 
-  state.model = trainLogisticRegression(candidates);
+  state.model = trainLogisticRegression(candidates); /* Trains the logistic regression model using both user feedback and bootstrapped labels based on heuristic rules. */
   state.candidates = candidates.map((candidate) => ({
     ...candidate,
     finalScore: logisticScore(state.model.weights, candidate.features)
   })).sort((a, b) => b.finalScore - a.finalScore);
   state.predictions = pickPredictions(state.candidates);
   addLog(`SchemaLogix matching completed with ${state.candidates.length} candidates and ${state.model.trainingCount} bootstrapped training labels.`);
+  showToast();
   renderAll();
 }
 
@@ -520,6 +535,7 @@ function renderMergedSchema() {
   `).join("") : `<div class="schema-item">No merged schema yet.</div>`;
 }
 
+// AFTER
 function renderMetrics() {
   const { averageProbability, validated } = metrics();
   const matches = state.predictions.filter((prediction) => prediction.decision === "Match").length;
@@ -528,6 +544,7 @@ function renderMetrics() {
   document.getElementById("unmatchedSourceCount").textContent = unmatched;
   document.getElementById("precisionValue").textContent = averageProbability.toFixed(2);
   document.getElementById("f1Value").textContent = validated;
+  document.getElementById("resultsThresholdBadge").textContent = `Threshold ${state.threshold.toFixed(2)}`; // ADD THIS LINE
 }
 
 function renderLogs() {
@@ -563,11 +580,12 @@ function setupTabs() {
 function setupEvents() {
   document.getElementById("runButton").addEventListener("click", scoreDatasets);
   document.getElementById("thresholdInput").addEventListener("input", (event) => {
-    state.threshold = Number(event.target.value);
-    document.getElementById("thresholdOutput").textContent = state.threshold.toFixed(2);
-    state.predictions = pickPredictions(state.candidates);
-    addLog(`Threshold changed to ${state.threshold.toFixed(2)}.`);
-    renderAll();
+  state.threshold = Number(event.target.value);
+  document.getElementById("thresholdOutput").textContent = state.threshold.toFixed(2);
+  document.getElementById("resultsThresholdBadge").textContent = `Threshold ${state.threshold.toFixed(2)}`;
+  state.predictions = pickPredictions(state.candidates);
+  addLog(`Threshold changed to ${state.threshold.toFixed(2)}.`);
+  renderAll();
   });
   document.getElementById("sourceUpload").addEventListener("change", (event) => loadUploadedCsv(event, "source"));
   document.getElementById("targetUpload").addEventListener("change", (event) => loadUploadedCsv(event, "target"));
@@ -590,16 +608,12 @@ function loadUploadedCsv(event, side) {
       document.getElementById("targetName").textContent = `Dataset B: ${file.name}`;
     }
     addLog(`Loaded uploaded ${side === "source" ? "Dataset A" : "Dataset B"} file: ${file.name}.`);
-    if (state.source && state.target) {
-      scoreDatasets();
-    } else {
-      renderAll();
-    }
+    renderAll();
   };
   reader.readAsText(file);
 }
 
-function validateCandidate(id, label) {
+function validateCandidate(id, label) { /* Records user feedback for a candidate pair and retrains the model if necessary. */
   state.feedback.set(id, label);
   const text = label === 1 ? "approved as a valid match" : "rejected as a non-match";
   addLog(`User validation recorded: ${id} ${text}.`);
